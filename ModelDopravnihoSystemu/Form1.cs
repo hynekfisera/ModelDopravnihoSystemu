@@ -65,11 +65,35 @@ namespace ModelDopravnihoSystemu
             for (int i = 0; i < auta.Count; i++)
             {
                 var auto = auta[i];
-                var rozdilx = Math.Abs((auto.jedeDoStanice ? auto.Start.X : auto.CentralniDispecink.Location.X) - auto.Location.X);
-                var rozdily = Math.Abs((auto.jedeDoStanice ? auto.Start.Y : auto.CentralniDispecink.Location.Y) - auto.Location.Y);
-                if (!(rozdilx <= 1 && rozdily <= 1))
+                var rozdilOdDispecinkuX = Math.Abs(auto.CentralniDispecink.Location.X - auto.Location.X);
+                var rozdilOdDispecinkuY = Math.Abs(auto.CentralniDispecink.Location.Y - auto.Location.Y);
+                var rozdilOdStaniceX = Math.Abs(auto.Start.X - auto.Location.X);
+                var rozdilOdStaniceY = Math.Abs(auto.Start.Y - auto.Location.Y);
+                auto.NaStanici = rozdilOdStaniceX <= 1 && rozdilOdStaniceY <= 1;
+                bool autoJeNaDispecinku = rozdilOdDispecinkuX <= 1 && rozdilOdDispecinkuY <= 1;
+                var rozdilx = auto.jedeDoStanice ? rozdilOdStaniceX : rozdilOdDispecinkuX;
+                var rozdily = auto.jedeDoStanice ? rozdilOdStaniceY : rozdilOdDispecinkuY;
+                if (auto.jedeDoStanice ? !auto.NaStanici : !autoJeNaDispecinku)
                 {
                     auto.Location = rozdilx >= rozdily ? auto.GetPointFromY() : auto.GetPointFromX();
+                }
+                else if (auto.NaStanici)
+                {
+                    if (auto.Naklad.Count != 0)
+                    {
+                        auto.VylozStanice();
+                    }
+                    auto.NalozStanice();
+                } else if (autoJeNaDispecinku)
+                {
+                    if (auto.Naklad.Count != 0)
+                    {
+                        auto.VylozDispecink();
+                    }
+                    if (centralniDispecink1.Baliky.Any(x => x == auto.Stanice.Id))
+                    {
+                        auto.NalozDispecink();
+                    }
                 }
             }
         }

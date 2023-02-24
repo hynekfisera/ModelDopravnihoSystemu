@@ -14,7 +14,8 @@ namespace ModelDopravnihoSystemu
     {
         public List<int> Naklad = new List<int>();
         public bool jedeDoStanice = false;
-        public Stanice Stanice = new Stanice();
+        public bool NaStanici = true;
+        public Stanice Stanice { get; set; }
         public Point Start { get; set; }
         public CentralniDispecink CentralniDispecink { get; set; }
         public int distance = 0;
@@ -42,6 +43,32 @@ namespace ModelDopravnihoSystemu
             int multiplier = Start.X < CentralniDispecink.Location.X ? 1 : -1;
             double y = Start.Y + (tangens * distance) * multiplier;
             return new Point((Start.X + distance * multiplier), (int)y);
+        }
+
+        public void NalozStanice()
+        {
+            Naklad.AddRange(Stanice.Odvezeni);
+            Stanice.Odvezeni.Clear();
+            if (Naklad.Count > 1)
+            {
+                jedeDoStanice = false;
+            }
+        }
+
+        public void VylozStanice()
+        {
+            Stanice.VyzvednutiCount += Naklad.Where(x => x == Stanice.Id).Count();
+            Naklad.RemoveAll(x => x == Stanice.Id);
+        }
+        public void NalozDispecink()
+        {
+            Naklad.AddRange(CentralniDispecink.Baliky.Where(x => x == Stanice.Id));
+            CentralniDispecink.Baliky.RemoveAll(x => x == Stanice.Id);
+        }
+        public void VylozDispecink()
+        {
+            CentralniDispecink.Baliky.AddRange(Naklad);
+            Naklad.Clear();
         }
     }
 }
